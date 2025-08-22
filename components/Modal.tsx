@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { TranslationSet } from '../i18n/locales';
 
 /**
  * Props for the Modal component.
@@ -17,13 +18,15 @@ interface ModalProps {
   onClose: () => void;
   /** The content to be displayed inside the modal. */
   children: React.ReactNode;
+  /** The translation object for the current language. */
+  t: TranslationSet;
 }
 
 /**
  * A reusable modal component that displays content in a centered overlay.
  * @param {ModalProps} props - The props for the component.
  */
-function Modal({ isOpen, onClose, children }: ModalProps) {
+function Modal({ isOpen, onClose, children, t }: ModalProps) {
   // Don't render anything if the modal is not open.
   if (!isOpen) return null;
 
@@ -43,7 +46,7 @@ function Modal({ isOpen, onClose, children }: ModalProps) {
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-500 hover:text-slate-200 transition-colors"
-          aria-label="Close"
+          aria-label={t.modalClose}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

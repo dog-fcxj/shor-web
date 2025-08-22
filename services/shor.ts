@@ -7,6 +7,7 @@
  */
 
 import { ShorAttempt, Convergent } from '../types';
+import type { TranslationSet } from '../i18n/locales';
 
 // --- BigInt Math Utility Functions ---
 
@@ -88,9 +89,10 @@ function getConvergents(c: bigint, q: bigint): Convergent[] {
  * An async generator function that simulates Shor's algorithm to factor a given number N.
  * It yields the state of the computation at each major step, allowing the UI to update in real-time.
  * @param N The odd integer greater than 1 to be factored.
+ * @param t The translation object for generating error messages.
  * @yields {ShorAttempt} An object representing the current state of the factorization attempt.
  */
-export async function* runShor(N: bigint): AsyncGenerator<ShorAttempt, void, undefined> {
+export async function* runShor(N: bigint, t: TranslationSet): AsyncGenerator<ShorAttempt, void, undefined> {
   if (N <= 1n || N % 2n === 0n) {
     throw new Error("Input must be an odd integer greater than 1.");
   }
@@ -132,8 +134,8 @@ export async function* runShor(N: bigint): AsyncGenerator<ShorAttempt, void, und
 
     // Determine the number of qubits 't' for the first register.
     const t_num = Math.ceil(2 * Math.log2(Number(N)));
-    const t = BigInt(t_num);
-    const q = 2n ** t;
+    const t_bigint = BigInt(t_num);
+    const q = 2n ** t_bigint;
 
     // Simulate a measurement 'c' which would be approximately s*q/r for some random s.
     const s = BigInt(Math.floor(Math.random() * (Number(r) - 1))) + 1n;
@@ -156,7 +158,7 @@ export async function* runShor(N: bigint): AsyncGenerator<ShorAttempt, void, und
 
     if (!candidateR) {
         currentAttempt.status = 'failed';
-        currentAttempt.error = "Continued fraction expansion did not yield a suitable period candidate.";
+        currentAttempt.error = t.shorErrorContFraction;
         yield currentAttempt;
         continue; // Try a new 'a'
     }
@@ -182,14 +184,14 @@ export async function* runShor(N: bigint): AsyncGenerator<ShorAttempt, void, und
 
     if (isPeriodOdd) {
       currentAttempt.status = 'failed';
-      currentAttempt.error = "The period 'r' is odd. A new base 'a' must be chosen.";
+      currentAttempt.error = t.shorErrorPeriodOdd;
       yield currentAttempt;
       continue; // Try a new 'a'
     }
     
     if (isTrivial) {
       currentAttempt.status = 'failed';
-      currentAttempt.error = `a^(r/2) ≡ -1 (mod N). This gives a trivial factor. A new base 'a' must be chosen.`;
+      currentAttempt.error = t.shorErrorTrivial;
       yield currentAttempt;
       continue; // Try a new 'a'
     }
@@ -215,7 +217,7 @@ export async function* runShor(N: bigint): AsyncGenerator<ShorAttempt, void, und
 
     // If factors are 1 or N, the attempt failed.
     currentAttempt.status = 'failed';
-    currentAttempt.error = "Calculated factors were trivial (1 or N).";
+    currentAttempt.error = t.shorErrorFactorsTrivial;
     yield currentAttempt;
   }
 }

@@ -8,12 +8,14 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import Katex from 'react-katex';
-import { ShorAttempt, ExplanationTopic } from './types';
+import { ShorAttempt, ExplanationTopic, Language } from './types';
 import { runShor } from './services/shor';
+import { translations } from './i18n/locales';
 import InputForm from './components/InputForm';
 import AttemptCard from './components/AttemptCard';
 import Modal from './components/Modal';
 import GeminiExplanation from './components/GeminiExplanation';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 /**
  * The main application component.
@@ -35,8 +37,18 @@ function App() {
   // State to store which topic is being explained in the modal.
   const [explanationTopic, setExplanationTopic] = useState<ExplanationTopic | null>(null);
 
+  // State for the current language, defaulting to English.
+  const [language, setLanguage] = useState<Language>('en');
+  const t = translations[language];
+
   // Ref to the container div for all attempt cards to enable auto-scrolling.
   const attemptsContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Effect to set the document language attribute whenever the language changes.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
 
   // Effect to automatically scroll to the latest attempt card when a new one is added.
   useEffect(() => {
@@ -67,11 +79,11 @@ function App() {
     const N = BigInt(nToFactor);
     // Basic input validation.
     if (N <= 1n) {
-      setError("Please enter a number greater than 1.");
+      setError(t.errorNumberTooSmall);
       return;
     }
     if (N % 2n === 0n) {
-      setError("Please enter an odd number. A factor is 2.");
+      setError(t.errorNumberEven);
       setFinalFactors([2n, N/2n]);
       return;
     }
@@ -85,7 +97,7 @@ function App() {
 
     try {
       // Consume the async generator from runShor to get step-by-step updates.
-      for await (const attempt of runShor(N)) {
+      for await (const attempt of runShor(N, t)) {
         // Update the state with the latest information for the current attempt.
         setAttempts(prev => {
           const existingAttemptIndex = prev.findIndex(a => a.id === attempt.id);
@@ -115,46 +127,47 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        <header className="text-center mb-8">
+        <header className="text-center mb-8 relative">
           <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-violet-500 mb-2">
-            Shor's Algorithm Explorer
+            {t.title}
           </h1>
           <p className="text-slate-400">
-            An interactive simulation of quantum factorization.
+            {t.subtitle}
           </p>
+          <LanguageSwitcher currentLang={language} onLangChange={setLanguage} />
         </header>
 
         <main>
-          <InputForm onStart={startFactorization} isLoading={isLoading} />
+          <InputForm onStart={startFactorization} isLoading={isLoading} t={t} />
           
           {error && (
             <div className="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg my-6 text-center">
-              <strong>Error:</strong> {error}
+              <strong>{t.errorLabel}:</strong> {error}
             </div>
           )}
 
           {currentN && !finalFactors && (
             <div className="my-6 text-center text-lg">
-              <p>Running factorization for <span className="font-bold text-sky-400">{currentN.toString()}</span>...</p>
+              <p>{t.runningFactorization(currentN.toString())}</p>
             </div>
           )}
 
           <div ref={attemptsContainerRef} className="space-y-6">
             {attempts.map((attempt) => (
-              <AttemptCard key={attempt.id} attempt={attempt} onExplain={handleExplain} />
+              <AttemptCard key={attempt.id} attempt={attempt} onExplain={handleExplain} t={t} />
             ))}
           </div>
 
           {isLoading && (
             <div className="flex justify-center items-center my-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-400"></div>
-              <p className="ml-4 text-slate-400">Simulating quantum process...</p>
+              <p className="ml-4 text-slate-400">{t.simulatingQuantum}</p>
             </div>
           )}
 
           {finalFactors && (
             <div className="mt-8 p-6 bg-green-900/50 border border-green-700 rounded-lg shadow-2xl text-center">
-              <h2 className="text-2xl font-bold text-green-300 mb-4">Factorization Complete!</h2>
+              <h2 className="text-2xl font-bold text-green-300 mb-4">{t.factorizationComplete}</h2>
               <div className="text-2xl sm:text-3xl text-slate-200">
                 <Katex.InlineMath math={`${finalFactors[0].toString()} \\times ${finalFactors[1].toString()} = ${currentN?.toString()}`} />
               </div>
@@ -163,9 +176,9 @@ function App() {
 
           {attempts.length > 0 && !finalFactors && !isLoading && !error && (
              <div className="mt-8 p-6 bg-yellow-900/50 border border-yellow-700 rounded-lg shadow-2xl text-center">
-              <h2 className="text-2xl font-bold text-yellow-300 mb-2">Factorization Failed</h2>
+              <h2 className="text-2xl font-bold text-yellow-300 mb-2">{t.factorizationFailed}</h2>
               <p className="text-lg">
-                The algorithm could not find factors for <span className="font-bold text-sky-400">{currentN?.toString()}</span> after several attempts. This can happen if the number is prime or due to the probabilistic nature of the algorithm.
+                {t.factorizationFailedMessage(currentN?.toString() ?? '')}
               </p>
             </div>
           )}
@@ -173,9 +186,9 @@ function App() {
         </main>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} t={t}>
         {explanationTopic && (
-          <GeminiExplanation topic={explanationTopic} />
+          <GeminiExplanation topic={explanationTopic} lang={language} />
         )}
       </Modal>
     </div>

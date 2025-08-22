@@ -5,6 +5,11 @@
  */
 
 /**
+ * Represents the supported language codes.
+ */
+export type Language = 'en' | 'zh';
+
+/**
  * Represents a single convergent from the continued fraction expansion.
  * Convergents are rational approximations of a real number.
  */

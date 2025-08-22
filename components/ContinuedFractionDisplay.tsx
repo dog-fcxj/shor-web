@@ -7,6 +7,7 @@
 import React from 'react';
 import Katex from 'react-katex';
 import { Convergent } from '../types';
+import type { TranslationSet } from '../i18n/locales';
 
 /**
  * Props for the ContinuedFractionDisplay component.
@@ -16,13 +17,15 @@ interface ContinuedFractionDisplayProps {
   convergents: Convergent[];
   /** The denominator selected as the best candidate for the period 'r'. */
   candidateR: bigint;
+  /** The translation object for the current language. */
+  t: TranslationSet;
 }
 
 /**
  * A component that displays the results of the continued fraction expansion in a table.
  * @param {ContinuedFractionDisplayProps} props - The props for the component.
  */
-function ContinuedFractionDisplay({ convergents, candidateR }: ContinuedFractionDisplayProps) {
+function ContinuedFractionDisplay({ convergents, candidateR, t }: ContinuedFractionDisplayProps) {
   return (
     <div className="overflow-x-auto bg-slate-950/50 p-4 rounded-lg border border-slate-700">
       <table className="w-full text-left text-sm whitespace-nowrap">
@@ -30,8 +33,8 @@ function ContinuedFractionDisplay({ convergents, candidateR }: ContinuedFraction
           <tr>
             <th className="p-2 text-center"><Katex.InlineMath math="k" /></th>
             <th className="p-2 text-center"><Katex.InlineMath math="a_k" /></th>
-            <th className="p-2 text-center">Convergent <Katex.InlineMath math="\frac{p_k}{q_k}" /></th>
-            <th className="p-2 text-center">Denominator <Katex.InlineMath math="q_k" /></th>
+            <th className="p-2 text-center">{t.tableHeaderConvergent} <Katex.InlineMath math="\frac{p_k}{q_k}" /></th>
+            <th className="p-2 text-center">{t.tableHeaderDenominator} <Katex.InlineMath math="q_k" /></th>
           </tr>
         </thead>
         <tbody className="font-mono">
@@ -39,7 +42,7 @@ function ContinuedFractionDisplay({ convergents, candidateR }: ContinuedFraction
             <tr 
               key={i} 
               className={`border-b border-slate-700/50 ${c.denominator === candidateR ? 'bg-sky-800/50 text-sky-300' : ''}`}
-              title={c.denominator === candidateR ? "This denominator is the best candidate for the period 'r'" : ""}
+              title={c.denominator === candidateR ? t.tableHintCandidate : ""}
             >
               <td className="p-2 text-center">{i}</td>
               <td className="p-2 text-center">{c.a.toString()}</td>
@@ -50,7 +53,7 @@ function ContinuedFractionDisplay({ convergents, candidateR }: ContinuedFraction
         </tbody>
       </table>
       <p className="mt-4 text-center text-slate-300">
-        Best candidate for period <Katex.InlineMath math={`r = ${candidateR.toString()}`} />.
+        {t.tableBestCandidate} <Katex.InlineMath math={`r = ${candidateR.toString()}`} />.
       </p>
     </div>
   );

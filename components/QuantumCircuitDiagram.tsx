@@ -8,24 +8,27 @@
 import React from 'react';
 import { ExplanationTopic } from '../types';
 import ExplainButton from './ExplainButton';
+import type { TranslationSet } from '../i18n/locales';
 
 /**
  * Props for the QuantumCircuitDiagram component.
  */
 interface QuantumCircuitDiagramProps {
   /** The number of qubits in the first register. */
-  t: number;
+  tQubits: number;
   /** The number of qubits in the second register, determined by the number to be factored. */
   nBits: number;
   /** Callback function to trigger the explanation modal. */
   onExplain: (topic: ExplanationTopic) => void;
+  /** The translation object for the current language. */
+  t: TranslationSet;
 }
 
 /**
  * A component that displays a simplified diagram of the quantum circuit for period finding.
  * @param {QuantumCircuitDiagramProps} props - The props for the component.
  */
-function QuantumCircuitDiagram({ t, nBits, onExplain }: QuantumCircuitDiagramProps) {
+function QuantumCircuitDiagram({ tQubits, nBits, onExplain, t }: QuantumCircuitDiagramProps) {
   const height = 150;
   const width = 500;
   const wireY1 = 50;
@@ -38,8 +41,8 @@ function QuantumCircuitDiagram({ t, nBits, onExplain }: QuantumCircuitDiagramPro
     <div className="p-4 bg-slate-950/50 rounded-lg border border-slate-700 flex flex-col items-center">
        <div className="w-full flex justify-start mb-2">
             <h5 className="text-md font-semibold text-slate-300 flex items-center">
-                Simplified Circuit Diagram
-                 <ExplainButton onClick={() => onExplain(ExplanationTopic.QuantumCircuit)} />
+                {t.circuitDiagramTitle}
+                 <ExplainButton onClick={() => onExplain(ExplanationTopic.QuantumCircuit)} t={t} />
             </h5>
         </div>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-lg">
@@ -50,14 +53,14 @@ function QuantumCircuitDiagram({ t, nBits, onExplain }: QuantumCircuitDiagramPro
         {/* Labels for the registers */}
         <text x={startX - 15} y={wireY1 + 4} fill="white" fontSize="12" textAnchor="end">|0⟩⊗t</text>
         <text x={startX - 15} y={wireY2 + 4} fill="white" fontSize="12" textAnchor="end">|0⟩⊗n</text>
-        <text x={endX + 15} y={wireY1 + 4} fill="white" fontSize="12">Measure</text>
+        <text x={endX + 15} y={wireY1 + 4} fill="white" fontSize="12">{t.circuitMeasure}</text>
 
         {/* Labels indicating the number of qubits in each register */}
-        <text x={(startX + 100) / 2} y={wireY1 - 5} fill="gray" fontSize="10">{t} qubits</text>
+        <text x={(startX + 100) / 2} y={wireY1 - 5} fill="gray" fontSize="10">{t.circuitQubits(tQubits)}</text>
         <line x1={startX} y1={wireY1-2} x2={startX} y2={wireY1+2} stroke="white" strokeWidth="1" />
         <line x1={100} y1={wireY1-2} x2={100} y2={wireY1+2} stroke="white" strokeWidth="1" />
 
-        <text x={(startX + 100) / 2} y={wireY2 - 5} fill="gray" fontSize="10">{nBits} qubits</text>
+        <text x={(startX + 100) / 2} y={wireY2 - 5} fill="gray" fontSize="10">{t.circuitQubits(nBits)}</text>
         <line x1={startX} y1={wireY2-2} x2={startX} y2={wireY2+2} stroke="white" strokeWidth="1" />
         <line x1={100} y1={wireY2-2} x2={100} y2={wireY2+2} stroke="white" strokeWidth="1" />
 
