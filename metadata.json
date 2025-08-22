@@ -1,0 +1,5 @@
+{
+  "name": "Shor's Algorithm Explorer",
+  "description": "An interactive web application that demonstrates integer factorization using a simulation of Shor's quantum algorithm, with built-in explanations for each step.",
+  "requestFramePermissions": []
+}
