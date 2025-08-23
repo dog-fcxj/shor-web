@@ -9,7 +9,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import Katex from 'react-katex';
 import { ShorAttempt, ExplanationTopic, Language } from './types';
-import { runShor } from './services/shor';
+import { runShor, isPrime } from './services/shor';
 import { translations } from './i18n/locales';
 import InputForm from './components/InputForm';
 import AttemptCard from './components/AttemptCard';
@@ -95,6 +95,13 @@ function App() {
     setFinalFactors(null);
     setCurrentN(N);
 
+    // Add a primality test before starting the main algorithm.
+    if (isPrime(N)) {
+      setError(t.errorNumberIsPrime);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Consume the async generator from runShor to get step-by-step updates.
       for await (const attempt of runShor(N, t)) {
@@ -146,7 +153,7 @@ function App() {
             </div>
           )}
 
-          {currentN && !finalFactors && (
+          {currentN && !finalFactors && !error && (
             <div className="my-6 text-center text-lg">
               <p>{t.runningFactorization(currentN.toString())}</p>
             </div>

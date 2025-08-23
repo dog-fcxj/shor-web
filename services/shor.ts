@@ -84,6 +84,52 @@ function getConvergents(c: bigint, q: bigint): Convergent[] {
   return convergents;
 }
 
+/**
+ * Checks if a BigInt is prime using the Miller-Rabin probabilistic test.
+ * @param n The number to test.
+ * @param k The number of rounds (witnesses) to test. Higher k means more accuracy.
+ * @returns True if n is likely prime, false if it is composite.
+ */
+export function isPrime(n: bigint, k: number = 10): boolean {
+  if (n <= 1n) return false;
+  if (n === 2n || n === 3n) return true;
+  if (n % 2n === 0n) return false;
+
+  // Write n - 1 as d * 2^s
+  let d = n - 1n;
+  let s = 0;
+  while (d % 2n === 0n) {
+    d /= 2n;
+    s++;
+  }
+
+  // Witness loop
+  for (let i = 0; i < k; i++) {
+    // Pick a random witness 'a' in [2, n-2]
+    const a = 2n + BigInt(Math.floor(Math.random() * (Number(n) - 3)));
+    let x = power(a, d, n);
+
+    if (x === 1n || x === n - 1n) {
+      continue; // This witness doesn't prove compositeness, try another.
+    }
+    
+    let isComposite = true;
+    for (let r = 0; r < s; r++) {
+      if (x === n - 1n) {
+        isComposite = false;
+        break;
+      }
+      x = (x * x) % n;
+    }
+
+    if (isComposite) {
+      return false; // n is definitely composite.
+    }
+  }
+
+  return true; // n is probably prime.
+}
+
 
 /**
  * An async generator function that simulates Shor's algorithm to factor a given number N.

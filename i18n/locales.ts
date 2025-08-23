@@ -29,6 +29,7 @@ const en = {
   errorNumberRange: "Please enter an integer between 4 and 100,000.",
   errorNumberEven: "Please enter an odd number. A factor is 2.",
   errorNumberTooSmall: "Please enter a number greater than 1.",
+  errorNumberIsPrime: "The number is prime and cannot be factored.",
   
   // Attempt Card
   attemptTitle: (id: number) => `Attempt #${id}`,
@@ -107,6 +108,7 @@ const zh: typeof en = {
   errorNumberRange: "请输入一个 4 到 100,000 之间的整数。",
   errorNumberEven: "请输入一个奇数。因子之一是 2。",
   errorNumberTooSmall: "请输入一个大于 1 的数字。",
+  errorNumberIsPrime: "该数字是素数，无法进行因式分解。",
   
   // Attempt Card
   attemptTitle: (id: number) => `尝试 #${id}`,
@@ -175,7 +177,7 @@ export const explanationTitles: Record<'en' | 'zh', Record<ExplanationTopic, str
     [ExplanationTopic.FinalFactorCalculation]: "Final Factor Calculation",
   },
   zh: {
-    [ExplanationTopic.ShorIntro]: "秀尔算法简介",
+    [ExplanationTopic.ShorIntro]: "Shor算法简介",
     [ExplanationTopic.CoprimeSelection]: "互质基数选择",
     [ExplanationTopic.QuantumPeriodFinding]: "量子周期查找",
     [ExplanationTopic.QuantumCircuit]: "量子电路",
@@ -197,9 +199,9 @@ export const explanationContent: Record<'en' | 'zh', Record<ExplanationTopic, st
     [ExplanationTopic.FinalFactorCalculation]: "Once a valid period 'r' is found (it's even and doesn't produce a trivial result), we know that $a^r \\equiv 1 \\pmod{N}$. This can be rewritten as $(a^{r/2} - 1)(a^{r/2} + 1) \\equiv 0 \\pmod{N}$.\n\nThis means that N must share a factor with either $(a^{r/2} - 1)$ or $(a^{r/2} + 1)$. We can find these factors by computing the greatest common divisor (GCD) with N:\n\n$$p = gcd(a^{r/2} - 1, N)$$\n$$q = gcd(a^{r/2} + 1, N)$$\n\nThese values, p and q, are the non-trivial factors of N.",
   },
   zh: {
-    [ExplanationTopic.ShorIntro]: "秀尔算法是一种用于整数因式分解的量子算法。它由彼得·秀尔于1994年提出，其重要性在于它能以指数级速度比最知名的经典算法更快地分解大数。这种能力对依赖于因式分解难度的现代密码学构成了威胁。\n\n该算法巧妙地将经典步骤与量子核心相结合。主要步骤如下：\n1. 选择一个随机数 'a'。\n2. 使用量子计算机找到函数 $f(x) = a^x \\pmod{N}$ 的周期 'r'。\n3. 使用周期 'r' 进行经典计算，找出 N 的因子。",
+    [ExplanationTopic.ShorIntro]: "Shor算法是一种用于整数因式分解的量子算法。它由彼得·秀尔于1994年提出，其重要性在于它能以指数级速度比最知名的经典算法更快地分解大数。这种能力对依赖于因式分解难度的现代密码学构成了威胁。\n\n该算法巧妙地将经典步骤与量子核心相结合。主要步骤如下：\n1. 选择一个随机数 'a'。\n2. 使用量子计算机找到函数 $f(x) = a^x \\pmod{N}$ 的周期 'r'。\n3. 使用周期 'r' 进行经典计算，找出 N 的因子。",
     [ExplanationTopic.CoprimeSelection]: "第一个经典步骤是选择一个随机整数 'a'，使得 $1 < a < N$。然后我们计算 'a' 和 'N' 的最大公约数 (GCD)，记为 $gcd(a, N)$。\n\n如果 $gcd(a, N) > 1$，我们就幸运地找到了 N 的一个非平凡因子，算法终止。如果 $gcd(a, N) = 1$，'a' 和 'N' 是互质的，我们继续进行算法的量子部分。这个检查是必要的，因为后续步骤依赖于 'a' 与 N 互质来形成一个有效的周期函数。",
-    [ExplanationTopic.QuantumPeriodFinding]: "这是秀尔算法的核心。我们需要找到函数 $$f(x) = a^x \\pmod{N}$$ 的周期 'r'。周期 'r' 是满足 $a^r \\equiv 1 \\pmod{N}$ 的最小正整数。\n\n对于经典计算机来说，找到 'r' 是极其困难的，但量子计算机可以使用量子傅里叶变换 (QFT) 高效地完成。量子电路准备一个状态的叠加态，同时为所有状态计算 $f(x)$，然后使用 QFT 变换该状态，使得周期 'r' 在测量时很可能被揭示出来。",
+    [ExplanationTopic.QuantumPeriodFinding]: "这是Shor算法的核心。我们需要找到函数 $$f(x) = a^x \\pmod{N}$$ 的周期 'r'。周期 'r' 是满足 $a^r \\equiv 1 \\pmod{N}$ 的最小正整数。\n\n对于经典计算机来说，找到 'r' 是极其困难的，但量子计算机可以使用量子傅里叶变换 (QFT) 高效地完成。量子电路准备一个状态的叠加态，同时为所有状态计算 $f(x)$，然后使用 QFT 变换该状态，使得周期 'r' 在测量时很可能被揭示出来。",
     [ExplanationTopic.QuantumCircuit]: "简化的电路由两个量子比特寄存器组成。第一个寄存器 (t-qubits) 使用哈达玛 (H) 门初始化为所有可能输入值的叠加态。第二个寄存器 (n-qubits) 用于存储函数的输出。\n\n一个受控 Uf 门然后计算 $f(x) = a^x \\pmod{N}$，使两个寄存器纠缠在一起。最后，对第一个寄存器应用逆量子傅里叶变换 (QFT⁻¹)。这种变换将概率幅度集中在与周期 'r' 相关的状态上。测量第一个寄存器会得到一个值，从中可以推断出 'r'。",
     [ExplanationTopic.ContinuedFractions]: "量子测量并不能直接给出周期 'r'。相反，它给出一个整数 'c'，这个 'c' 是 $q/r$ 的某个随机倍数的良好近似值，其中 'q' 是第一个量子寄存器的大小 ($q = 2^t$)。因此，我们有近似关系 $$\\frac{c}{q} \\approx \\frac{s}{r}$$ 对于某个未知的整数 's'。\n\n连分数算法是一种经典的数学方法，用于寻找给定值的最佳有理数近似。通过将其应用于 $c/q$，我们可以高效地恢复分数 $s/r$ 并提取分母，分母就是我们周期 'r' 的候选值。",
     [ExplanationTopic.PeriodVerification]: "在连分数步骤为我们提供了一个候选周期 'r' 之后，我们必须执行两次经典检查。\n\n首先，我们检查 'r' 是否为奇数。如果是，则该方法对当前的 'a' 失败，我们必须用一个新的 'a' 重新开始。\n\n其次，如果 'r' 是偶数，我们计算 $a^{r/2} \\pmod{N}$。如果结果与 $-1 \\pmod{N}$ (或 $N-1$) 同余，它会导致平凡因子 (1 和 N)。这也是一个失败情况，需要重新开始。如果 'r' 是偶数且第二次检查通过，我们就找到了一个有效的周期，可以进入最后一步。",
